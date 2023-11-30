@@ -11,7 +11,7 @@ class UserInterface:
 
     def build(self):
         self.window = tk.Tk()
-        self.window.geometry("800x500")
+        self.window.geometry("1000x500")
         self.build_labels()
         self.build_text_widgets()
 
@@ -23,7 +23,7 @@ class UserInterface:
 
         offsets = []
         for i in range(16):
-            hex_offset = "00" + hex(i)[2:] + "0"
+            hex_offset = "000000" + hex(i)[2:] + "0"
             offsets.append(hex_offset)
 
         self.index_label = tk.Label(text=' '.join(indices), font=("Courier", 14), )
@@ -37,6 +37,9 @@ class UserInterface:
             self.window, font=("Courier", 14),
             width=16, height=16
         )
+
+    def build_buttons(self):
+        pass
 
     def place_widgets(self):
         self.index_label.place(x=0, y=0)
