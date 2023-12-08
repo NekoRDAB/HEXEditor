@@ -3,47 +3,59 @@ from dataclasses import dataclass
 import sys
 import os
 
+<<<<<<< HEAD
 @dataclass
 class BytePage:
     index : int
     values : bytes
 
 class HexFile:
+=======
+>>>>>>> a1f8da0a33cbf3578164666f8ea6161a9f1042b0
 
-    def __init__(self, path : str) -> None:
+class HexFile:
+    def __init__(self, path: str) -> None:
         self._file = open(path, 'r+b')
         self._cursor = self._file.seek(0)
+<<<<<<< HEAD
         self._max_position = self._file.seek(0,2)
     
     def get_next_bytes(self) -> BytePage:
         if self._cursor >= self._max_position:
+=======
+        self._max_position = self._file.seek(0, 2)
+
+    def get_next_bytes(self) -> bytes:
+        if self.is_eof():
+>>>>>>> a1f8da0a33cbf3578164666f8ea6161a9f1042b0
             self._cursor -= 256
         self._file.seek(self._cursor)
         data = BytePage(self._file.read(256), self._cursor // 256)
         self._cursor += 256
         return data
-    
+
     def get_prev_bytes(self) -> bytes:
         self._cursor -= 512
         if self._cursor < 0:
             self._cursor = 0
         return self.get_next_bytes()
-    
-    def change_byte_at(self, position : int, byte : int) -> None:
+
+    def change_byte_at(self, position: int, byte: int) -> None:
         assert 0 <= position <= self._max_position, 'Change position is out of bounds of file!'
         if position == self._max_position:
             self._max_position += 1
         self._file.seek(position)
         self._file.write(byte.to_bytes())
-    
+
     def is_eof(self) -> bool:
         return self._cursor >= self._max_position
-    
+
     def close(self) -> None:
         self._file.close()
 
+
 @contextmanager
-def open_hex(path : str) -> HexFile:
+def open_hex(path: str) -> HexFile:
     full_path = get_path(path)
     hex_file = HexFile(full_path)
     try:
@@ -51,10 +63,11 @@ def open_hex(path : str) -> HexFile:
     finally:
         hex_file.close()
 
-def get_path(filename : str) -> str:
+
+def get_path(filename: str) -> str:
     if os.path.isfile(filename):
         return filename
-    filename = filename.rsplit('\\',1)[-1]
+    filename = filename.rsplit('\\', 1)[-1]
     for root, dirs, files in os.walk(os.getcwd()):
         if filename in files or filename in dirs:
             return os.path.join(root, filename)
