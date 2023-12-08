@@ -19,7 +19,7 @@ class HexFile:
         if self._cursor >= self._max_position:
             self._cursor -= 256
         self._file.seek(self._cursor)
-        data = BytePage(self._file.read(256), self._cursor // 256)
+        data = BytePage(self._cursor // 256, self._file.read(256))
         self._cursor += 256
         return data
     
