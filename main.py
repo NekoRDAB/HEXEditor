@@ -1,5 +1,9 @@
+from console_interface import ConsoleInterface
+
+
 def main():
-    raise NotImplementedError()
+    console_interface = ConsoleInterface()
+    console_interface.run()
 
 
 if __name__ == "__main__":
