@@ -3,19 +3,21 @@ from dataclasses import dataclass
 import sys
 import os
 
+
 @dataclass
 class BytePage:
-    index : int
-    values : bytes
+    index: int
+    values: bytes
+
 
 class HexFile:
     PAGE_SIZE = 256
 
-    def __init__(self, path : str) -> None:
+    def __init__(self, path: str) -> None:
         self._file = open(path, 'r+b')
         self._cursor = self._file.seek(0)
-        self._max_position = self._file.seek(0,2)
-    
+        self._max_position = self._file.seek(0, 2)
+
     def _move_cursor(self, backwards=False):
         offset = self.PAGE_SIZE
         if backwards:
@@ -23,35 +25,36 @@ class HexFile:
         self._cursor += offset
         if not 0 <= self._cursor <= self._max_position:
             self._cursor -= offset
-    
+
     def get_next_bytes(self) -> BytePage:
-        if self._cursor >= self._max_position:
+        if self.is_eof():
             self._move_cursor(backwards=True)
         self._file.seek(self._cursor)
         data = BytePage(self._cursor // 256, self._file.read(256))
         self._move_cursor()
         return data
-    
+
     def get_prev_bytes(self) -> bytes:
         self._move_cursor(backwards=True)
         self._move_cursor(backwards=True)
         return self.get_next_bytes()
-    
-    def change_byte_at(self, position : int, byte : int) -> None:
+
+    def change_byte_at(self, position: int, byte: int) -> None:
         assert 0 <= position <= self._max_position, 'Change position is out of bounds of file!'
         if position == self._max_position:
             self._max_position += 1
         self._file.seek(position)
         self._file.write(byte.to_bytes())
-    
+
     def is_eof(self) -> bool:
         return self._cursor >= self._max_position
-    
+
     def close(self) -> None:
         self._file.close()
 
+
 @contextmanager
-def open_hex(path : str) -> HexFile:
+def open_hex(path: str) -> HexFile:
     full_path = get_path(path)
     hex_file = HexFile(full_path)
     try:
@@ -59,10 +62,11 @@ def open_hex(path : str) -> HexFile:
     finally:
         hex_file.close()
 
-def get_path(filename : str) -> str:
+
+def get_path(filename: str) -> str:
     if os.path.isfile(filename):
         return filename
-    filename = filename.rsplit('\\',1)[-1]
+    filename = filename.rsplit('\\', 1)[-1]
     for root, dirs, files in os.walk(os.getcwd()):
         if filename in files or filename in dirs:
             return os.path.join(root, filename)
