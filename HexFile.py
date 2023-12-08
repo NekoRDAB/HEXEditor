@@ -9,24 +9,32 @@ class BytePage:
     values : bytes
 
 class HexFile:
+    PAGE_SIZE = 256
 
     def __init__(self, path : str) -> None:
         self._file = open(path, 'r+b')
         self._cursor = self._file.seek(0)
         self._max_position = self._file.seek(0,2)
     
+    def _move_cursor(self, backwards=False):
+        offset = self.PAGE_SIZE
+        if backwards:
+            offset *= -1
+        self._cursor += offset
+        if not 0 <= self._cursor <= self._max_position:
+            self._cursor -= offset
+    
     def get_next_bytes(self) -> BytePage:
         if self._cursor >= self._max_position:
-            self._cursor -= 256
+            self._move_cursor(backwards=True)
         self._file.seek(self._cursor)
         data = BytePage(self._cursor // 256, self._file.read(256))
-        self._cursor += 256
+        self._move_cursor()
         return data
     
     def get_prev_bytes(self) -> bytes:
-        self._cursor -= 512
-        if self._cursor < 0:
-            self._cursor = 0
+        self._move_cursor(backwards=True)
+        self._move_cursor(backwards=True)
         return self.get_next_bytes()
     
     def change_byte_at(self, position : int, byte : int) -> None:
