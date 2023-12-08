@@ -1,6 +1,12 @@
 from contextlib import contextmanager
+from dataclasses import dataclass
 import sys
 import os
+
+@dataclass
+class BytePage:
+    index : int
+    values : bytes
 
 class HexFile:
 
@@ -9,11 +15,11 @@ class HexFile:
         self._cursor = self._file.seek(0)
         self._max_position = self._file.seek(0,2)
     
-    def get_next_bytes(self) -> bytes:
+    def get_next_bytes(self) -> BytePage:
         if self._cursor >= self._max_position:
             self._cursor -= 256
         self._file.seek(self._cursor)
-        data = self._file.read(256)
+        data = BytePage(self._file.read(256), self._cursor // 256)
         self._cursor += 256
         return data
     
