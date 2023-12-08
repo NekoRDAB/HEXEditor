@@ -15,7 +15,7 @@ class HexFile:
 
     def __init__(self, path: str) -> None:
         self._file = open(path, 'r+b')
-        self._cursor = self._file.seek(0)
+        self._cursor = -self.PAGE_SIZE
         self._max_position = self._file.seek(0, 2)
 
     def _move_cursor(self, backwards=False):
@@ -23,21 +23,26 @@ class HexFile:
         if backwards:
             offset *= -1
         self._cursor += offset
-        if not 0 <= self._cursor <= self._max_position:
+        if self._cursor < 0:
+            self._cursor = 0
+        if self._cursor > self._max_position:
             self._cursor -= offset
 
-    def get_next_bytes(self) -> BytePage:
-        if self.is_eof():
-            self._move_cursor(backwards=True)
+    def _get_current_page(self):
         self._file.seek(self._cursor)
-        data = BytePage(self._cursor // 256, self._file.read(256))
+        data = self._file.read(self.PAGE_SIZE)
+        page_num = self._cursor // self.PAGE_SIZE
+        return BytePage(page_num, data)
+
+    def get_next_bytes(self) -> BytePage:
         self._move_cursor()
-        return data
+        page = self._get_current_page()
+        return page
 
     def get_prev_bytes(self) -> bytes:
         self._move_cursor(backwards=True)
-        self._move_cursor(backwards=True)
-        return self.get_next_bytes()
+        data = self._get_current_page()
+        return data
 
     def change_byte_at(self, position: int, byte: int) -> None:
         assert 0 <= position <= self._max_position, 'Change position is out of bounds of file!'
