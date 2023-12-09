@@ -31,7 +31,9 @@ class testHexFile(unittest.TestCase):
         forward_read_data = []
         backwards_read_data = deque()
         page_count = 0
+        page_size = 0
         with open_hex('test/test_files/test_multiple_file.txt') as f:
+            page_size = f.PAGE_SIZE
             while not f.is_eof():
                 forward_read_data.extend(f.get_next_bytes().values)
                 page_count += 1
@@ -40,9 +42,16 @@ class testHexFile(unittest.TestCase):
                     reversed(f.get_prev_bytes().values))
 
         self.assertSequenceEqual(expected, forward_read_data)
-        self.assertSequenceEqual(expected, backwards_read_data)
+        self.assertSequenceEqual(expected[:-page_size], backwards_read_data)
 
     def test_prev_zero_page_returns_first_page(self):
         with open_hex('test/test_files/simple_file.txt') as f:
             expected = ('A'*f.PAGE_SIZE).encode(encoding='ascii')
             self.assertEqual(f.get_prev_bytes(), BytePage(0, expected))
+
+    def test_next_page_after_last_returns_last_page(self):
+        with open_hex('test/test_files/simple_file.txt') as f:
+            expected = None
+            while not f.is_eof():
+                expected = f.get_next_bytes()
+            self.assertEqual(f.get_next_bytes(), expected)
