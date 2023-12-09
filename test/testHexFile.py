@@ -13,7 +13,8 @@ class testHexFile(unittest.TestCase):
 
     def test_multiple_read(self):
         page_count = 7
-        expected = bytearray(random.randint(0, 255) for _ in range(page_count*HexFile.PAGE_SIZE))
+        expected = bytearray(random.randint(0, 255)
+                             for _ in range(page_count*HexFile.PAGE_SIZE))
         with open('test/test_files/test_multiple_file.txt', 'wb') as f:
             f.write(expected)
 
@@ -38,8 +39,9 @@ class testHexFile(unittest.TestCase):
 
         self.assertSequenceEqual(expected, forward_read_data)
         last_page_start = len(expected) - len(expected) % 256
-        self.assertSequenceEqual(expected[:last_page_start], backwards_read_data)
-    
+        self.assertSequenceEqual(
+            expected[:last_page_start], backwards_read_data)
+
     def test_next_and_prev_work_together(self):
         expected_len = 2048
         expected = bytearray(random.randint(0, 255)
@@ -60,17 +62,15 @@ class testHexFile(unittest.TestCase):
             while not f.is_eof():
                 expected = f.get_next_bytes()
             self.assertEqual(f.get_next_bytes(), expected)
-    
+
     def test_when_page_len_less_than_default(self):
         for _ in range(20):
-            page_count = random.randint(0,10)
+            page_count = random.randint(0, 10)
             byte_count = random.randint(1, 254)
             total_byte_count = page_count*HexFile.PAGE_SIZE + byte_count
-            data = bytearray(random.randint(0,255)
-                            for _ in range(total_byte_count))
+            data = bytearray(random.randint(0, 255)
+                             for _ in range(total_byte_count))
             filename = 'test/test_files/small_file.txt'
             with open(filename, 'wb') as f:
                 f.write(data)
             self.check_both_directions(filename, data)
-        
-
