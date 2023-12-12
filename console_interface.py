@@ -1,4 +1,5 @@
 import tkinter as tk
+from HexFile import HexFile
 
 
 class ConsoleInterface:
@@ -10,6 +11,7 @@ class ConsoleInterface:
         self.offset_label: str
         self.hex_text: list
         self.ascii_text: list
+        self.file: HexFile
 
     def create_labels(self, segment_index: int):
         self.index_label = " " * 9 + ' '.join([f"{index:02x}" for index in range(16)])
