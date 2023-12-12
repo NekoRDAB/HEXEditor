@@ -24,16 +24,18 @@ class CommandHandler:
             )
 
     def change_byte(self, args):
-        try:
-            position = int(args[2])
-        except ValueError:
-            raise ValueError(f"Wrong position: {args[2]}")
+        position = self.parse_position_from_args(args)
         if not self.is_byte(args[3]):
             raise ValueError(f"Wrong value to replace a byte: {args[3]}")
         self.change_list.append(ByteChanger(position, args[3]))
 
     def change_symbol(self, args):
-        pass
+        position = self.parse_position_from_args(args)
+        if len(args[3]) != 1:
+            raise ValueError(f"Wrong value to replace a symbol: {args[3]}")
+        ascii_code = ord(args[3])
+        byte_value = f"{ascii_code:02x}"
+        self.change_list.append(ByteChanger(position, byte_value))
 
     @staticmethod
     def is_byte(value):
@@ -41,3 +43,11 @@ class CommandHandler:
         if len(value) == 2 and value[0] in digits and value[1] in digits:
             return True
         return False
+
+    @staticmethod
+    def parse_position_from_args(args):
+        try:
+            position = int(args[2])
+        except ValueError:
+            raise ValueError(f"Wrong position: {args[2]}")
+        return position
