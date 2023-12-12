@@ -26,7 +26,7 @@ class HexFile:
         if self._cursor < 0:
             self._cursor = 0
 
-    def _get_current_page(self):
+    def _get_current_page(self) -> BytePage:
         self._file.seek(self._cursor)
         data = self._file.read(self.PAGE_SIZE)
         page_num = self._cursor // self.PAGE_SIZE
@@ -39,7 +39,7 @@ class HexFile:
         self._move_cursor()
         return page
 
-    def get_prev_bytes(self) -> bytes:
+    def get_prev_bytes(self) -> BytePage:
         self._move_cursor(backwards=True)
         self._move_cursor(backwards=True)
         data = self._get_current_page()

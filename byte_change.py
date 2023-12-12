@@ -2,6 +2,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ByteChanger:
+class ByteChange:
     position: int
     value: str
