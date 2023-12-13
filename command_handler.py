@@ -1,5 +1,5 @@
 from byte_change import ByteChange
-from HexFile import HexFile, open_hex
+from HexFile import HexFile, open_hex, get_path
 
 
 class Command:
@@ -27,6 +27,12 @@ class CommandHandler:
         )
         self.commands["open"] = Command(
             self.open, "open {file_name}"
+        )
+        self.commands["next"] = Command(
+            self.next, "next"
+        )
+        self.commands["prev"] = Command(
+            self.prev, "prev"
         )
 
     def execute_command(self, args: list):
@@ -68,13 +74,24 @@ class CommandHandler:
 
     def open(self, args):
         if len(args) != 2:
-            print(f"Wrong number of arguments: {len(args)}. Expected filename")
+            self.commands["open"].print_usage()
             return None
-        path = args[1]
-        with open_hex(path) as hex_file:
-            self.interface.open_file(hex_file)
+        filename = args[1]
+        path = get_path(filename)
+        hex_file = HexFile(path)
+        self.interface.open_file(hex_file)
 
+    def next(self, args):
+        if len(args) != 1:
+            self.commands["next"].print_usage()
+            return None
+        self.interface.next()
 
+    def prev(self, args):
+        if len(args) != 1:
+            self.commands["prev"].print_usage()
+            return None
+        self.interface.prev()
 
     @staticmethod
     def is_byte(value: str) -> bool:
