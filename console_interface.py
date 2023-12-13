@@ -1,5 +1,6 @@
-import tkinter as tk
+import os
 from HexFile import HexFile
+from command_handler import CommandHandler
 
 
 class ConsoleInterface:
@@ -7,6 +8,8 @@ class ConsoleInterface:
         self.create_variables()
 
     def create_variables(self):
+        self.hex_file: HexFile
+        self.command_handler: CommandHandler
         self.index_label: str
         self.offset_label: str
         self.hex_text: list
@@ -14,7 +17,7 @@ class ConsoleInterface:
         self.file: HexFile
 
     def create_labels(self, segment_index: int):
-        self.index_label = " " * 9 + ' '.join([f"{index:02x}" for index in range(16)])
+        self.index_label = " " * 8 + ' '.join([f"{index:02x}" for index in range(16)])
         self.offset_label = [f"{segment_index:06x}{offset:x}0" for offset in range(16)]
 
     def create_hex_text(self, byte_segment: list):
@@ -37,13 +40,27 @@ class ConsoleInterface:
         return '.'
 
     def output_text(self):
+        os.system('cls')
         print(self.index_label)
         for line_index in range(16):
             print(f"{self.offset_label[line_index]}{self.hex_text[line_index]}  {self.ascii_text[line_index]}")
 
-    def run(self):
-        self.create_labels(1)
-        byte_segment = [f"{byte:02x}" for byte in range(255, -1, -1)]
+    def open_file(self, hex_file: HexFile):
+        self.hex_file = hex_file
+        byte_page = hex_file.get_next_bytes()
+        segment_index = byte_page.index
+        byte_array = byte_page.values
+        byte_segment = [f"{byte:02x}" for byte in byte_array]
+        self.create_labels(segment_index)
         self.create_hex_text(byte_segment)
         self.create_ascii_text(byte_segment)
         self.output_text()
+
+    def run(self):
+        self.command_handler = CommandHandler(self)
+        command = input()
+        while command != "exit":
+            self.command_handler.execute_command(command.split())
+            command = input()
+
+        byte_segment = [f"{byte:02x}" for byte in range(255, -1, -1)]

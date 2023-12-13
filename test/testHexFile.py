@@ -4,8 +4,7 @@ from collections import deque
 from HexFile import open_hex, BytePage, HexFile
 
 
-class testHexFile(unittest.TestCase):
-
+class TestHexFile(unittest.TestCase):
     def test_simple_read(self):
         with open_hex('test/test_files/simple_file.txt') as f:
             expected = ('A'*f.PAGE_SIZE).encode(encoding='ascii')
