@@ -17,7 +17,7 @@ class ConsoleInterface:
         self.file: HexFile
 
     def create_labels(self, segment_index: int):
-        self.index_label = " " * 8 + ' '.join([f"{index:02x}" for index in range(16)])
+        self.index_label = " " * 9 + ' '.join([f"{index:02x}" for index in range(16)])
         self.offset_label = [f"{segment_index:06x}{offset:x}0" for offset in range(16)]
 
     def create_hex_text(self, byte_segment: list):

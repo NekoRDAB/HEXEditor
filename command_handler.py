@@ -1,4 +1,4 @@
-from byte_change import ByteChange
+from byte_change import ByteChange, apply_changes
 from HexFile import HexFile, open_hex, get_path
 
 
@@ -33,6 +33,9 @@ class CommandHandler:
         )
         self.commands["prev"] = Command(
             self.prev, "prev"
+        )
+        self.commands["save"] = Command(
+            self.save, "save"
         )
 
     def execute_command(self, args: list):
@@ -92,6 +95,16 @@ class CommandHandler:
             self.commands["prev"].print_usage()
             return None
         self.interface.prev()
+
+    def save(self, args):
+        if len(args) != 1:
+            self.commands["save"].print_usage()
+            return None
+        file = self.interface.hex_file
+        apply_changes(file, self.change_list)
+        path = file.path
+        file.close()
+        self.interface.open_file(HexFile(path))
 
     @staticmethod
     def is_byte(value: str) -> bool:

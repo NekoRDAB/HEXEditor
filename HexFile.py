@@ -14,6 +14,7 @@ class HexFile:
     PAGE_SIZE = 256
 
     def __init__(self, path: str) -> None:
+        self.path = path
         self._file = open(path, 'r+b')
         self._cursor = 0
         self._max_position = self._file.seek(0, 2)
@@ -51,7 +52,7 @@ class HexFile:
         if position == self._max_position:
             self._max_position += 1
         self._file.seek(position)
-        self._file.write(byte.to_bytes())
+        self._file.write(byte.to_bytes(1, "big"))
 
     def is_eof(self) -> bool:
         return self._cursor >= self._max_position
