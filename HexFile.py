@@ -65,7 +65,7 @@ class SimpleHexFile:
     def truncate(self):
         self._max_position = self._cursor
     
-    #Сдвигает границу текущей границы на последний ненулевой байт
+    #Сдвигает границу текущей страницы на последний ненулевой байт
     def trim(self):
         if self._cursor > self._max_position:
             self._cursor = self._max_position
@@ -142,9 +142,9 @@ class HexFile:
             if self._right.is_empty():
                 next_page.extend(self._source.get_next_bytes())
             else:
-                next_page.extend(self._right.pop(trim=True))
+                next_page.extend(reversed(self._right.pop(trim=True)))
         if len(next_page) > PAGE_SIZE:
-            self._right.push(next_page[PAGE_SIZE:], trim=True)
+            self._right.push(next_page[PAGE_SIZE:][::-1], trim=True)
         return next_page[:PAGE_SIZE]
 
     def get_prev_bytes(self) -> BytePage:
@@ -156,7 +156,7 @@ class HexFile:
             self._left.push(last_page)
             return BytePage(self._count, last_page)
         self._count -= 1
-        self._right.push(last_page, trim=True)
+        self._right.push(last_page[::-1], trim=True)
         return BytePage(self._count, self._left.peek())
 
     def get_current_page(self) -> BytePage:
@@ -173,13 +173,7 @@ class HexFile:
         changed_data = last_page[:index] + data + last_page[index:]
         self._left.push(changed_data[:256])
         if len(changed_data) > 256:
-            has_page = False
-            if not self._right.is_empty():
-                has_page = True
-                data = self._right.pop()
-            self._right.push(changed_data[256:], trim=True)
-            if has_page:
-                self._right.push(data, trim=True)
+            self._right.push(changed_data[256:][::-1], trim=True)
 
     def delete(self, index, length):
         if self._left.is_empty():
@@ -187,7 +181,8 @@ class HexFile:
                 'Can not delete anything, no pages read yet!')
         last_page = self._left.pop()
         changed_data = last_page[:index] + last_page[index + length:]
-        self._left.push(self._try_get_full_page(changed_data))
+        self._right.push(changed_data[::-1], trim=True)
+        self._left.push(self._try_get_full_page())
 
     def is_eof(self):
         return self._right.is_empty() and self._source.is_eof()
