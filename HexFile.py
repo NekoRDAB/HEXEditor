@@ -92,13 +92,12 @@ class HexFileStack():
         if trim:
             self._file.trim()
 
-    def pop(self, trim=False) -> bytes:
+    def pop(self) -> bytes:
         if self.is_empty():
             raise IndexError('Stack is empty')
         self._file.move_cursor(backwards=True)
         data = self._file.get_current_page()
-        if trim:
-            self._file.truncate()
+        self._file.truncate()
         return data
 
     def peek(self) -> bytes:
@@ -142,7 +141,7 @@ class HexFile:
             if self._right.is_empty():
                 next_page.extend(self._source.get_next_bytes())
             else:
-                next_page.extend(reversed(self._right.pop(trim=True)))
+                next_page.extend(reversed(self._right.pop()))
         if len(next_page) > PAGE_SIZE:
             self._right.push(next_page[PAGE_SIZE:][::-1], trim=True)
         return next_page[:PAGE_SIZE]
