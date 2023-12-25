@@ -12,9 +12,6 @@ class BytePage:
     values: bytes
 
 
-EMPTY_PAGE = bytes(256)
-
-
 class SimpleHexFile:
 
     def __init__(self, path: str, to_create: bool = False) -> None:
@@ -58,14 +55,15 @@ class SimpleHexFile:
         else:
             self._file.seek(self._cursor)
         self._file.write(data)
-        self._max_position += max(0, self._cursor + len(data) - self._max_position)
+        self._max_position += max(0, self._cursor +
+                                  len(data) - self._max_position)
         self._file.seek(self._cursor)
 
-    #Сдвигает конец файла на текущее положение файла
+    # Сдвигает конец файла на текущее положение файла
     def truncate(self):
         self._max_position = self._cursor
-    
-    #Сдвигает границу текущей страницы на последний ненулевой байт
+
+    # Сдвигает границу текущей страницы на последний ненулевой байт
     def trim(self):
         if self._cursor > self._max_position:
             self._cursor = self._max_position
@@ -132,8 +130,8 @@ class HexFile:
         self._count += 1
         self._left.push(self._try_get_full_page())
         return BytePage(self._count, self._left.peek())
-    
-    def _try_get_full_page(self, initial_data : bytes=None):
+
+    def _try_get_full_page(self, initial_data: bytes = None):
         next_page = bytearray()
         if initial_data is not None:
             next_page.extend(initial_data)
@@ -170,9 +168,9 @@ class HexFile:
             return
         last_page = self._left.pop()
         changed_data = last_page[:index] + data + last_page[index:]
-        self._left.push(changed_data[:256])
-        if len(changed_data) > 256:
-            self._right.push(changed_data[256:][::-1], trim=True)
+        self._left.push(changed_data[:PAGE_SIZE])
+        if len(changed_data) > PAGE_SIZE:
+            self._right.push(changed_data[PAGE_SIZE:][::-1], trim=True)
 
     def delete(self, index, length):
         if self._left.is_empty():
@@ -182,8 +180,8 @@ class HexFile:
         changed_data = last_page[:index] + last_page[index + length:]
         self._right.push(changed_data[::-1], trim=True)
         self._left.push(self._try_get_full_page())
-    
-    def change_byte_at(self, index : int, value : int):
+
+    def change_byte_at(self, index: int, value: int):
         if self._left.is_empty():
             raise IndexError(
                 'Can not change anything, no pages read yet!')
@@ -194,7 +192,7 @@ class HexFile:
     def is_eof(self):
         return self._right.is_empty() and self._source.is_eof()
 
-    def close(self, to_save=True) -> None:       
+    def close(self, to_save=True) -> None:
         if not to_save:
             return
         while not self.is_eof():
