@@ -53,27 +53,27 @@ class CommandHandler:
             self.commands["change"].print_usage()
             return None
         if args[1] == "byte":
-            self.change_list.append(self.change_byte(args))
+            self.change_byte(args)
         elif args[1] == "symbol":
-            self.change_list.append(self.change_symbol(args))
+            self.change_symbol(args)
         else:
             self.commands["change"].print_usage()
 
-    def change_byte(self, args: list) -> ByteChange:
+    def change_byte(self, args: list):
         position = self.parse_position_from_args(args)
         if position == -1 or not self.is_byte(args[3]):
             self.commands["change"].print_usage()
             return None
-        return ByteChange(position, args[3])
+        self.change_list.append(ByteChange(position, args[3]))
 
-    def change_symbol(self, args: list) -> ByteChange:
+    def change_symbol(self, args: list):
         position = self.parse_position_from_args(args)
         if position == -1 or len(args[3]) != 1:
             self.commands["change"].print_usage()
             return None
         ascii_code = ord(args[3])
         byte_value = f"{ascii_code:02x}"
-        return ByteChange(position, byte_value)
+        self.change_list.append(ByteChange(position, byte_value))
 
     def open(self, args):
         if len(args) != 2:
