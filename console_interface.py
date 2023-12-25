@@ -56,6 +56,16 @@ class ConsoleInterface:
         self.create_ascii_text(byte_segment)
         self.output_text()
 
+    def current(self):
+        byte_page = self.hex_file.get_current_page()
+        byte_array = byte_page.values
+        byte_segment = [f"{byte:02x}" for byte in byte_array]
+        segment_index = byte_page.index
+        self.create_labels(segment_index)
+        self.create_hex_text(byte_segment)
+        self.create_ascii_text(byte_segment)
+        self.output_text()
+
     def next(self):
         byte_page = self.hex_file.get_next_bytes()
         byte_array = byte_page.values

@@ -1,5 +1,5 @@
-from byte_change import ByteChange, apply_changes
-from HexFile import HexFile, open_hex, get_path
+from HexFile import HexFile, get_path
+import os
 
 
 class Command:
@@ -18,7 +18,6 @@ class CommandHandler:
     def __init__(self, interface):
         self.interface = interface
         self.commands = dict()
-        self.change_list = []
         self.register_commands()
 
     def register_commands(self):
@@ -36,6 +35,9 @@ class CommandHandler:
         )
         self.commands["save"] = Command(
             self.save, "save"
+        )
+        self.commands["insert"] = Command(
+            self.insert, "insert {position} {XX}"
         )
 
     def execute_command(self, args: list):
@@ -64,7 +66,8 @@ class CommandHandler:
         if position == -1 or not self.is_byte(args[3]):
             self.commands["change"].print_usage()
             return None
-        self.change_list.append(ByteChange(position, args[3]))
+        self.interface.hex_file.change_byte_at(position, int(args[3], base=16))
+        self.interface.current()
 
     def change_symbol(self, args: list):
         position = self.parse_position_from_args(args)
@@ -72,8 +75,8 @@ class CommandHandler:
             self.commands["change"].print_usage()
             return None
         ascii_code = ord(args[3])
-        byte_value = f"{ascii_code:02x}"
-        self.change_list.append(ByteChange(position, byte_value))
+        self.interface.hex_file.change_byte_at(position, ascii_code)
+        self.interface.current()
 
     def open(self, args):
         if len(args) != 2:
@@ -100,11 +103,16 @@ class CommandHandler:
         if len(args) != 1:
             self.commands["save"].print_usage()
             return None
-        file = self.interface.hex_file
-        apply_changes(file, self.change_list)
-        path = file.path
-        file.close()
-        self.interface.open_file(HexFile(path))
+        self.interface.hex_file.close()
+        os.system("cls")
+
+    def insert(self, args):
+        position = self.parse_position_from_args(args)
+        if position == -1 or not self.is_byte(args[2]):
+            self.commands["insert"].print_usage()
+            return None
+        self.interface.hex_file.insert(position, int(args[2], base=16))
+        self.interface.current()
 
     @staticmethod
     def is_byte(value: str) -> bool:

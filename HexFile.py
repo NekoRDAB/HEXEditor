@@ -78,7 +78,7 @@ class SimpleHexFile:
         self._file.close()
 
 
-class HexFileStack():
+class HexFileStack:
 
     def __init__(self, path: str) -> None:
         self.path = path
