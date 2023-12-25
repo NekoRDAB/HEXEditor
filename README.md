@@ -23,7 +23,7 @@ Inserts given byte in position
 ```
 delete {position}
 ```
-Deletes byte from gieven position
+Deletes byte from given position
 
 ```
 save
