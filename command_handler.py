@@ -107,11 +107,15 @@ class CommandHandler:
         os.system("cls")
 
     def insert(self, args):
-        position = self.parse_position_from_args(args)
+        try:
+            position = int(args[1], base=16)
+        except ValueError:
+            print(f"Wrong position: {args[1]}")
+            return -1
         if position == -1 or not self.is_byte(args[2]):
             self.commands["insert"].print_usage()
             return None
-        self.interface.hex_file.insert(position, int(args[2], base=16))
+        self.interface.hex_file.insert(position, bytes(chr(int(args[2], base=16)), encoding="utf-8"))
         self.interface.current()
 
     @staticmethod
