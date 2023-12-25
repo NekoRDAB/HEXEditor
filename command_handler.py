@@ -39,6 +39,9 @@ class CommandHandler:
         self.commands["insert"] = Command(
             self.insert, "insert {position} {XX}"
         )
+        self.commands["delete"] = Command(
+            self.delete, "delete {position}"
+        )
 
     def execute_command(self, args: list):
         if len(args) == 0:
@@ -107,6 +110,8 @@ class CommandHandler:
         os.system("cls")
 
     def insert(self, args):
+        if len(args) != 2:
+            self.commands["insert"].print_usage()
         try:
             position = int(args[1], base=16)
         except ValueError:
@@ -116,6 +121,20 @@ class CommandHandler:
             self.commands["insert"].print_usage()
             return None
         self.interface.hex_file.insert(position, bytes(chr(int(args[2], base=16)), encoding="utf-8"))
+        self.interface.current()
+
+    def delete(self, args):
+        if len(args) != 2:
+            self.commands["delete"].print_usage()
+        try:
+            position = int(args[1], base=16)
+        except ValueError:
+            print(f"Wrong position: {args[1]}")
+            return -1
+        if position == -1:
+            self.commands["delete"].print_usage()
+            return None
+        self.interface.hex_file.delete(position, 1)
         self.interface.current()
 
     @staticmethod
