@@ -197,9 +197,8 @@ class HexFile:
             return
         while not self.is_eof():
             self.get_next_bytes()
-        self._source.close()
-        self._right.close()
         self._left.close()
+        self._right.close()
         self._source.close()
         os.remove(self._right.path)
         os.remove(self._source.path)
