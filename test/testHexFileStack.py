@@ -49,5 +49,7 @@ class testHexFileStack(unittest.TestCase):
         while not stack.is_empty():
             actual_data.append(stack.pop())
         for i in range(0, len(expected), 256):
-            self.assertEquals(expected[i: i + 256], actual_data[-(i//256 + 1)])
+            current_expected = list(expected[i: i + 256])
+            current_actual_data = list(actual_data[-(i//256 + 1)])
+            self.assertSequenceEqual(current_expected, current_actual_data)
         self.assertRaises(IndexError, stack.pop)

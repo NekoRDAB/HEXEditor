@@ -182,16 +182,27 @@ class HexFile:
         changed_data = last_page[:index] + last_page[index + length:]
         self._right.push(changed_data[::-1], trim=True)
         self._left.push(self._try_get_full_page())
+    
+    def change_byte_at(self, index : int, value : int):
+        if self._left.is_empty():
+            raise IndexError(
+                'Can not change anything, no pages read yet!')
+        page = bytearray(self._left.pop())
+        page[index] = value
+        self._left.push(page)
 
     def is_eof(self):
         return self._right.is_empty() and self._source.is_eof()
 
-    def close(self, to_save=True) -> None:
-        self._source.close()
+    def close(self, to_save=True) -> None:       
         if not to_save:
             return
         while not self.is_eof():
             self.get_next_bytes()
+        self._source.close()
+        self._right.close()
+        self._left.close()
+        self._source.close()
         os.remove(self._right.path)
         os.remove(self._source.path)
         os.rename(self._left.path, self._source.path)
