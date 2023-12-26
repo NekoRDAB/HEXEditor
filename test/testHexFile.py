@@ -1,7 +1,7 @@
 import random
 import unittest
 from collections import deque
-from HexFile import open_hex, BytePage, HexFile, PAGE_SIZE
+from HexFile import open_hex, BytePage, PAGE_SIZE
 
 
 class TestHexFile(unittest.TestCase):
@@ -35,7 +35,7 @@ class TestHexFile(unittest.TestCase):
                     reversed(f.get_prev_bytes().values))
 
         self.assertSequenceEqual(expected, forward_read_data)
-        last_page_start = len(expected) - ((len(expected) - 1) % 256 + 1)
+        last_page_start = len(expected) - ((len(expected) - 1) % PAGE_SIZE + 1)
         self.assertSequenceEqual(
             expected[:last_page_start], backwards_read_data)
 
@@ -62,7 +62,7 @@ class TestHexFile(unittest.TestCase):
     def test_when_page_len_less_than_default(self):
         for _ in range(20):
             page_count = random.randint(0, 10)
-            byte_count = random.randint(1, 254)
+            byte_count = random.randint(1, PAGE_SIZE-2)
             total_byte_count = page_count*PAGE_SIZE + byte_count
             data = bytearray(random.randint(0, 255)
                              for _ in range(total_byte_count))
@@ -70,3 +70,30 @@ class TestHexFile(unittest.TestCase):
             with open(filename, 'wb') as f:
                 f.write(data)
             self.check_both_directions(filename, data)
+    
+    def test_delete(self):
+        data = random.randbytes(PAGE_SIZE)
+        filename = 'test\\test_files\\test_changes.txt'
+        with open(filename, 'wb') as f:
+            f.write(data)
+        index = random.randint(0, len(data)-1)
+        length = random.randint(1, len(data)-index)
+        data = data[:index] + data[index+length:]
+        with open_hex(filename) as f:
+            f.get_next_bytes()
+            f.delete(index, length)
+            self.assertSequenceEqual(data, f.get_current_page().values)
+    
+    def test_insert(self):
+        data = random.randbytes(PAGE_SIZE)
+        filename = 'test\\test_files\\test_changes.txt'
+        with open(filename, 'wb') as f:
+            f.write(data)
+        index = random.randint(0, len(data)-1)
+        insert_data = random.randbytes(random.randint(1, PAGE_SIZE))
+        data = data[:index] + insert_data + data[index:]
+        with open_hex(filename) as f:
+            f.get_next_bytes()
+            f.insert(index, insert_data)
+            actual_data = f.get_current_page().values + f.get_next_bytes().values
+            self.assertSequenceEqual(data, actual_data)

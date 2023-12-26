@@ -1,6 +1,6 @@
 import random
 import unittest
-from HexFile import HexFileStack
+from HexFile import HexFileStack, PAGE_SIZE
 
 
 class testHexFileStack(unittest.TestCase):
@@ -11,14 +11,14 @@ class testHexFileStack(unittest.TestCase):
 
     def testPushAndPop(self):
         stack = HexFileStack('test.bin')
-        data = random.randbytes(256)
+        data = random.randbytes(PAGE_SIZE)
         stack.push(data)
-        self.assertEquals(data, stack.pop())
+        self.assertEqual(data, stack.pop())
         self.assertRaises(IndexError, stack.pop)
 
     def testPushNotFullPage(self):
         stack = HexFileStack('test.bin')
-        data = random.randbytes(random.randint(1, 254))
+        data = random.randbytes(random.randint(1, PAGE_SIZE-2))
         stack.push(data)
         self.assertEquals(data, stack.pop())
         self.assertRaises(IndexError, stack.pop)
@@ -28,7 +28,7 @@ class testHexFileStack(unittest.TestCase):
         expected = []
         page_count = random.randint(2, 10)
         for _ in range(page_count):
-            current_page = random.randbytes(256)
+            current_page = random.randbytes(PAGE_SIZE)
             expected.append(current_page)
             stack.push(current_page)
         actual_data = []
@@ -42,14 +42,17 @@ class testHexFileStack(unittest.TestCase):
         expected = bytearray()
         page_count = random.randint(2, 10)
         for _ in range(page_count):
-            current_page = random.randbytes(random.randint(1, 255))
+            current_page = random.randbytes(random.randint(1, PAGE_SIZE-1))
             expected.extend(current_page)
-            stack.push(current_page)
+            stack.push(current_page, trim=True)
         actual_data = []
         while not stack.is_empty():
             actual_data.append(stack.pop())
-        for i in range(0, len(expected), 256):
-            current_expected = list(expected[i: i + 256])
-            current_actual_data = list(actual_data[-(i//256 + 1)])
+        for i in range(0, len(expected), PAGE_SIZE):
+            if i == 0:
+                current_expected = expected[-i-PAGE_SIZE:]
+            else:
+                current_expected = expected[-i-PAGE_SIZE:-i]
+            current_actual_data = actual_data[i//256]
             self.assertSequenceEqual(current_expected, current_actual_data)
         self.assertRaises(IndexError, stack.pop)
